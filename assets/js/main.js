@@ -190,7 +190,7 @@
             status.textContent = "You're in! Check your inbox for your free value.";
             status.classList.add("ok"); form.reset();
           } else {
-            status.textContent = (res.d && res.d.error) || "Something went wrong. Please try again.";
+            status.textContent = (res.d && res.d.error) || "Sign-ups aren't live just yet. Email james@fitpreneuragency.com and we'll add you.";
             status.classList.add("err");
           }
         })
