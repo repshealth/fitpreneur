@@ -27,22 +27,6 @@
   nav.addEventListener("click", function (e) { if (e.target.closest("a")) setMenu(false); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") setMenu(false); });
 
-  /* Active nav link by section */
-  var links = Array.prototype.slice.call(document.querySelectorAll(".nav ul a"));
-  var sections = links.map(function (a) {
-    var id = a.getAttribute("href").slice(1);
-    return id === "top" ? document.body : document.getElementById(id);
-  });
-  function onScrollNav() {
-    var pos = window.scrollY + window.innerHeight * 0.35;
-    var idx = 0;
-    sections.forEach(function (s, i) { if (s && s !== document.body && s.offsetTop <= pos) idx = i; });
-    if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) idx = links.length - 1;
-    links.forEach(function (a, i) { a.classList.toggle("is-active", i === idx); });
-  }
-  window.addEventListener("scroll", onScrollNav, { passive: true });
-  onScrollNav();
-
   /* Reveal on scroll */
   var revealEls = document.querySelectorAll(".reveal");
   if ("IntersectionObserver" in window && !reduceMotion) {
@@ -167,35 +151,132 @@
     }
   }
 
-  /* Newsletter form */
-  var form = document.querySelector(".nl-form");
-  if (form) {
+  /* Forms (newsletter + contact) -> FormSubmit AJAX endpoint */
+  var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  document.querySelectorAll("form.js-form").forEach(function (form) {
     var status = form.querySelector(".nl-status");
     var btn = form.querySelector("button[type=submit]");
+    form.querySelectorAll("select").forEach(function (sel) {
+      sel.addEventListener("change", function () { sel.classList.toggle("has-value", !!sel.value); });
+    });
+    function fail(msg, field) {
+      status.textContent = msg; status.className = "nl-status err";
+      if (field) field.focus();
+    }
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-      status.className = "nl-status";
-      var name = form.name.value.trim(), email = form.email.value.trim();
-      if (!name) { status.textContent = "Please add your name."; status.classList.add("err"); form.name.focus(); return; }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { status.textContent = "Please enter a valid email address."; status.classList.add("err"); form.email.focus(); return; }
-      btn.disabled = true; status.textContent = "Signing you up...";
+      status.className = "nl-status"; status.textContent = "";
+      var data = {};
+      new FormData(form).forEach(function (v, k) { data[k] = typeof v === "string" ? v.trim() : v; });
+      if (data._honey) return; // bot
+      if (form.name && !data.name) return fail("Please add your name.", form.querySelector("[name=name]"));
+      if (!emailRe.test(data.email || "")) return fail("Please enter a valid email address.", form.querySelector("[name=email]"));
+      var svc = form.querySelector("select[name=service]");
+      if (svc && !svc.value) return fail("Please choose which service you're interested in.", svc);
+      if (data.phone && data.country_code) { data.phone = data.country_code + " " + data.phone; }
+      delete data.country_code;
+      btn.disabled = true; status.textContent = "Sending...";
       fetch(form.action, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name, email: email, company: form.company.value })
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(data)
       })
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, d: d }; }); })
         .then(function (res) {
-          if (res.ok) {
-            status.textContent = "You're in! Check your inbox for your free value.";
-            status.classList.add("ok"); form.reset();
+          var ok = res.ok && String(res.d.success) !== "false";
+          if (ok) {
+            status.textContent = form.dataset.success || "Thanks, we've got it!";
+            status.className = "nl-status ok"; form.reset();
+            form.querySelectorAll("select").forEach(function (sel) { sel.classList.remove("has-value"); });
           } else {
-            status.textContent = (res.d && res.d.error) || "Sign-ups aren't live just yet. Email james@fitpreneuragency.com and we'll add you.";
-            status.classList.add("err");
+            fail("Something went wrong. Please try again, or email james@fitpreneuragency.com.");
           }
         })
-        .catch(function () { status.textContent = "Network error. Please try again."; status.classList.add("err"); })
+        .catch(function () { fail("Network error. Please try again, or email james@fitpreneuragency.com."); })
         .finally(function () { btn.disabled = false; });
     });
+  });
+
+  /* About: numbered rows progress line */
+  var arWrap = document.querySelector(".about-rows");
+  if (arWrap) {
+    var arFill = arWrap.querySelector(".ar-fill");
+    var arLine = arWrap.querySelector(".ar-line");
+    var arRows = Array.prototype.slice.call(arWrap.querySelectorAll(".ar-row"));
+    var onAr = function () {
+      var rect = arLine.getBoundingClientRect();
+      var trigger = window.innerHeight * 0.5;
+      var prog = Math.max(0, Math.min(trigger - rect.top, rect.height));
+      arFill.style.height = prog + "px";
+      arRows.forEach(function (row, i) {
+        var num = row.querySelector(".ar-num").getBoundingClientRect();
+        row.classList.toggle("is-active", i === 0 || num.top < trigger);
+      });
+    };
+    window.addEventListener("scroll", onAr, { passive: true });
+    window.addEventListener("resize", onAr);
+    onAr();
+  }
+
+  /* Services: draw connector lines from the centre coin to each card */
+  var map = document.querySelector(".svc-map");
+  if (map) {
+    var svg = map.querySelector(".svc-lines");
+    var coin = map.querySelector(".svc-coin");
+    var svcCards = Array.prototype.slice.call(map.querySelectorAll(".svc-card"));
+    var drawLines = function () {
+      if (getComputedStyle(svg).display === "none") return;
+      var m = map.getBoundingClientRect(), c = coin.getBoundingClientRect();
+      var cx = c.left + c.width / 2 - m.left, cy = c.top + c.height / 2 - m.top, r = c.width / 2;
+      var paths = svcCards.map(function (card, i) {
+        var b = card.getBoundingClientRect();
+        var top = b.top - m.top, bottom = b.bottom - m.top, left = b.left - m.left, right = b.right - m.left;
+        var midY = top + b.height / 2, off = (i % 2 ? 1 : -1) * 8;
+        if (card.classList.contains("c-c")) {
+          return "M" + cx + " " + (cy + r) + " V" + top;
+        }
+        var isLeft = card.classList.contains("c-l"), dir = isLeft ? -1 : 1;
+        var edge = isLeft ? right : left;
+        if (card.classList.contains("r2")) {
+          // straight across, then a short step into the card
+          return "M" + (cx + dir * r) + " " + cy + " H" + (edge - dir * 22) + " V" + midY + " H" + edge;
+        }
+        // leave the coin vertically, then turn into the card
+        var startX = cx + dir * (r * 0.45) + off * 0;
+        var startY = card.classList.contains("r1") ? cy - r * 0.9 : cy + r * 0.9;
+        var elbowX = edge - dir * 18;
+        return "M" + startX + " " + startY + " V" + (midY) + " H" + elbowX + " H" + edge;
+      });
+      svg.setAttribute("viewBox", "0 0 " + m.width + " " + m.height);
+      svg.innerHTML = paths.map(function (d) { return '<path d="' + d + '"/>'; }).join("");
+    };
+    drawLines();
+    window.addEventListener("resize", drawLines);
+    window.addEventListener("load", drawLines);
+  }
+
+  /* About: video modal (only shown when a video URL is set) */
+  var playBtn = document.querySelector(".play-btn");
+  if (playBtn && playBtn.dataset.video) {
+    playBtn.hidden = false;
+    var modal = document.createElement("div");
+    modal.className = "video-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-label", "Video");
+    modal.innerHTML = '<button class="vm-close" type="button" aria-label="Close video">&times;</button><div class="vm-inner"></div>';
+    document.body.appendChild(modal);
+    var inner = modal.querySelector(".vm-inner");
+    var closeVideo = function () { modal.classList.remove("is-open"); inner.innerHTML = ""; playBtn.focus(); };
+    playBtn.addEventListener("click", function () {
+      var url = playBtn.dataset.video;
+      inner.innerHTML = /\.(mp4|webm)(\?|$)/i.test(url)
+        ? '<video src="' + url + '" controls autoplay playsinline></video>'
+        : '<iframe src="' + url + (url.indexOf("?") > -1 ? "&" : "?") + 'autoplay=1" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="FitPreneur video"></iframe>';
+      modal.classList.add("is-open");
+      modal.querySelector(".vm-close").focus();
+    });
+    modal.addEventListener("click", function (e) { if (e.target === modal || e.target.classList.contains("vm-close")) closeVideo(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && modal.classList.contains("is-open")) closeVideo(); });
   }
 })();

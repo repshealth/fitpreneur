@@ -46,21 +46,22 @@
   <!-- HEADER -->
   <header class="site-header" id="top">
     <div class="container header-inner">
-      <a class="brand" href="./" aria-label="FitPreneur Agency home">
+      <a class="brand" href="index.html" aria-label="FitPreneur Agency home">
         <img src="assets/img/logo.png" alt="FitPreneur Agency" width="130" height="39">
       </a>
 
       <nav class="nav" id="site-nav" aria-label="Main">
         <ul>
-          <li><a href="#top" class="is-active">Home</a></li>
-          <li><a href="#about">About Us</a></li>
-          <li><a href="#services">Services</a></li>
-          <li><a href="#contact">Contact Us</a></li>
+          <li><a href="index.html" class="is-active" aria-current="page">Home</a></li>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="case-studies.html">Case Studies</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
         </ul>
-        <a class="btn btn-gold nav-cta-mobile" href="mailto:james@fitpreneuragency.com?subject=Let%27s%20talk%20about%20growing%20my%20fitness%20business">Talk to Us!</a>
+        <a class="btn btn-gold nav-cta-mobile" href="contact.html">Talk to Us!</a>
       </nav>
 
-      <a class="btn btn-gold header-cta" href="mailto:james@fitpreneuragency.com?subject=Let%27s%20talk%20about%20growing%20my%20fitness%20business">Talk to Us!</a>
+      <a class="btn btn-gold header-cta" href="contact.html">Talk to Us!</a>
 
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
         <span></span><span></span>
@@ -82,7 +83,7 @@
         </h1>
         <p class="hero-sub reveal">Grow your fitness business with a team of industry experts that have the exact tools you need to succeed. No courses. No fluff.</p>
         <div class="reveal">
-          <a class="btn btn-gold btn-lg" href="mailto:james@fitpreneuragency.com?subject=I%27d%20like%20to%20work%20with%20FitPreneur">Work with us!</a>
+          <a class="btn btn-gold btn-lg" href="contact.html">Work with us!</a>
         </div>
 
         <dl class="stats">
@@ -179,12 +180,12 @@
       </div>
 
       <div class="center reveal">
-        <a class="btn btn-gold" href="mailto:james@fitpreneuragency.com?subject=I%27d%20like%20to%20work%20with%20FitPreneur">Work with us</a>
+        <a class="btn btn-gold" href="contact.html">Work with us</a>
       </div>
     </section>
 
     <!-- PROCESS / ABOUT -->
-    <section class="process" id="about" aria-labelledby="process-title">
+    <section class="process" id="process" aria-labelledby="process-title">
       <canvas class="waves" aria-hidden="true"></canvas>
       <div class="container">
         <h2 id="process-title" class="section-title left reveal">Transform your <span class="gold">business</span>,<br>Transform your <span class="gold">life</span></h2>
@@ -204,7 +205,7 @@
     </section>
 
     <!-- FEATURES / SERVICES -->
-    <section class="features" id="services" aria-labelledby="features-title">
+    <section class="features" id="features" aria-labelledby="features-title">
       <div class="container">
         <h2 id="features-title" class="section-title left reveal">Our features <span class="gold">designed</span><br>to help you <span class="gold">scale</span></h2>
       </div>
@@ -284,7 +285,7 @@
       <div class="container center">
         <h2 id="cta-title" class="section-title reveal">Want more <span class="gold">info?</span></h2>
         <div class="reveal">
-          <a class="btn btn-white" href="mailto:james@fitpreneuragency.com?subject=I%27d%20like%20more%20info">Get more info</a>
+          <a class="btn btn-white" href="contact.html">Get more info</a>
         </div>
       </div>
 
@@ -294,12 +295,14 @@
             <img src="assets/img/logo-mark.png" alt="" width="16" height="25">
             <h2>Join our growth newsletter</h2>
           </div>
-          <form class="nl-form" action="api/subscribe" method="post" novalidate>
+          <form class="nl-form js-form" action="https://formsubmit.co/ajax/james@fitpreneuragency.com" method="post" novalidate data-success="You're in! Check your inbox for your free value.">
+            <input type="hidden" name="_subject" value="New newsletter sign-up from the FitPreneur website">
+            <input type="hidden" name="_template" value="table">
             <label class="sr-only" for="nl-name">Name</label>
             <input id="nl-name" name="name" type="text" placeholder="Name" autocomplete="name" required>
             <label class="sr-only" for="nl-email">Email address</label>
             <input id="nl-email" name="email" type="email" placeholder="Email address" autocomplete="email" required>
-            <div class="hp" aria-hidden="true"><label>Leave this empty <input name="company" type="text" tabindex="-1" autocomplete="off"></label></div>
+            <div class="hp" aria-hidden="true"><label>Leave this empty <input name="_honey" type="text" tabindex="-1" autocomplete="off"></label></div>
             <button class="btn-block" type="submit">Get free Value</button>
             <p class="nl-status" role="status" aria-live="polite"></p>
           </form>
@@ -329,7 +332,8 @@
         <div>
           <h2>Useful Info</h2>
           <ul class="link-list">
-            <li><a href="#contact">Contact Us</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="case-studies.html">Case Studies</a></li>
             <li><a href="privacy.html">Privacy Policy</a></li>
             <li><a href="cookies.html">Cookie Policy</a></li>
           </ul>

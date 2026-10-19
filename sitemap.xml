@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://fitpreneuragency.com/</loc><priority>1.0</priority></url>
+  <url><loc>https://fitpreneuragency.com/about</loc><priority>0.8</priority></url>
+  <url><loc>https://fitpreneuragency.com/services</loc><priority>0.8</priority></url>
+  <url><loc>https://fitpreneuragency.com/case-studies</loc><priority>0.8</priority></url>
+  <url><loc>https://fitpreneuragency.com/contact</loc><priority>0.8</priority></url>
   <url><loc>https://fitpreneuragency.com/privacy</loc><priority>0.3</priority></url>
   <url><loc>https://fitpreneuragency.com/cookies</loc><priority>0.3</priority></url>
 </urlset>

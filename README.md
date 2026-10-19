@@ -1,60 +1,48 @@
 # FitPreneur Agency website
 
-Static HTML/CSS/JS site, built for GitHub + Cloudflare Pages. No build step.
+Static HTML/CSS/JS site. No build step. Currently hosted on GitHub Pages.
 
-## Structure
+## Pages
 
-```
-index.html              Homepage
-privacy.html            Privacy Policy  (served at /privacy)
-cookies.html            Cookie Policy   (served at /cookies)
-404.html                Not-found page
-assets/css/styles.css   All styles (colours are CSS variables at the top)
-assets/js/main.js       Menu, carousels, timeline, stat counters, newsletter form
-assets/img/             Logo, favicon, creator photos, feature images (WebP)
-functions/api/subscribe.js   Cloudflare Pages Function: newsletter form -> MailerLite
-_headers                Security + caching headers for Cloudflare
-robots.txt, sitemap.xml SEO
-```
-
-## Deploy
-
-1. Create a new GitHub repo (e.g. `fitpreneur-website`) and push this folder to it:
-   ```
-   git init
-   git add .
-   git commit -m "FitPreneur website"
-   git branch -M main
-   git remote add origin https://github.com/<you>/fitpreneur-website.git
-   git push -u origin main
-   ```
-2. Cloudflare dashboard > Workers & Pages > Create > Pages > Connect to Git > pick the repo.
-3. Build settings: Framework preset **None**, build command **empty**, output directory **/** (root).
-4. Deploy. Then Pages project > Custom domains > add `fitpreneuragency.com` (and `www`).
-
-## Newsletter (MailerLite)
-
-The "Join our growth newsletter" form posts to `/api/subscribe`, which adds the person to MailerLite.
-
-In Cloudflare: Pages project > Settings > Environment variables (Production), add:
-
-| Variable | Value |
+| File | Page |
 | --- | --- |
-| `MAILERLITE_API_KEY` | MailerLite > Integrations > API > generate token (set as encrypted) |
-| `MAILERLITE_GROUP_ID` | Optional. The ID of the group new subscribers should join |
+| `index.html` | Home |
+| `about.html` | About Us |
+| `services.html` | Services |
+| `case-studies.html` | Case Studies |
+| `contact.html` | Contact Us |
+| `privacy.html`, `cookies.html` | Legal pages |
+| `404.html` | Not-found page |
 
-Redeploy after adding them. Until the key is set, the form shows a friendly "not configured yet" message.
+Shared assets: `assets/css/styles.css` (colours are CSS variables at the top), `assets/js/main.js`, images in `assets/img/`.
 
-## Things to update
+The header and footer are repeated in every page. If you change the nav or footer, change it in all `.html` files.
 
-- **CTA buttons** ("Talk to Us!", "Work with us", "Get more info") currently open an email to james@fitpreneuragency.com. To send people to a booking page instead, search `index.html` for `mailto:james@fitpreneuragency.com?subject=` and replace those hrefs with your calendar link.
-- **Nav links** scroll to sections on the homepage: About Us = the process timeline, Services = features, Contact Us = newsletter/contact.
-- **Legal pages** are sensible starting templates. Give them a once-over before launch.
-- **Domain**: canonical/OG/sitemap URLs assume `https://fitpreneuragency.com`. Change them if you use another domain.
+## Forms (contact + newsletter)
+
+Both forms post to [FormSubmit](https://formsubmit.co), which emails each submission to james@fitpreneuragency.com. No account needed.
+
+**First-time setup:** submit the contact form once on the live site. FormSubmit sends an activation email to james@fitpreneuragency.com. Click the link in it, and every submission after that arrives in your inbox.
+
+To send newsletter sign-ups to a different address or service, change the form `action` in `index.html` (search for `formsubmit.co`).
+
+## About page video
+
+The play button on the About page is hidden until there's a video to play. In `about.html`, find `data-video=""` and add either:
+- a YouTube embed URL, e.g. `https://www.youtube.com/embed/VIDEO_ID`
+- a Vimeo embed URL, e.g. `https://player.vimeo.com/video/VIDEO_ID`
+- or a path to an `.mp4` file in the repo
+
+## Hosting
+
+**GitHub Pages (current):** Settings > Pages > Deploy from branch > `main` / root. All links are relative so the site works at `repshealth.github.io/fitpreneur/`.
+`404.html` uses `/fitpreneur/` paths because GitHub serves it from any URL. If you move to a custom domain, change `/fitpreneur/` to `/` in that file.
+
+**Cloudflare Pages (later):** connect the repo, framework preset None, no build command, output directory `/`. `functions/api/subscribe.js` is an optional MailerLite integration for the newsletter if you move there (set `MAILERLITE_API_KEY` and optionally `MAILERLITE_GROUP_ID`, then point the newsletter form `action` at `api/subscribe`).
 
 ## Local preview
 
 ```
 python3 -m http.server 8000
 ```
-Then open http://localhost:8000 (the newsletter API only works on Cloudflare, or locally with `npx wrangler pages dev .`).
+Then open http://localhost:8000
